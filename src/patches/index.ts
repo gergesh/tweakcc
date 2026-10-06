@@ -87,15 +87,18 @@ import { writeAutoAcceptPlanMode } from './autoAcceptPlanMode';
 import { writeAllowBypassPermsInSudo } from './allowBypassPermsInSudo';
 import { writeSuppressNativeInstallerWarning } from './suppressNativeInstallerWarning';
 import { writeScrollEscapeSequenceFilter } from './scrollEscapeSequenceFilter';
+import { writeTmuxGraphicsPassthrough } from './tmuxGraphicsPassthrough';
 import { writeWorktreeMode } from './worktreeMode';
 import { writeAllowCustomAgentModels } from './allowCustomAgentModels';
 import { writeVoiceMode } from './voiceMode';
 import { writeChannelsMode } from './channelsMode';
 import { writeSkipDevChannelsDialog } from './skipDevChannelsDialog';
 import { writeSkipTrustDialog } from './skipTrustDialog';
+import { writeRemoveExpandedMessagePadding } from './expandedMessagePadding';
 import { writeDisableCtrlZSuspend } from './disableCtrlZSuspend';
 import { writeWebFetchUserAgent } from './webFetchUserAgent';
 import { writeSkipSkillShellValidation } from './skipSkillShellValidation';
+import { writeDangerousRmEnvCheck } from './dangerousRmEnvCheck';
 import { isShimmerCustomized, writeShimmerStyle } from './shimmerStyle';
 import {
   applyPatchImplementationsToGraph,
@@ -454,6 +457,13 @@ const PATCH_DEFINITIONS = [
     description:
       'Filter out terminal escape sequences that cause unwanted scrolling',
   },
+  {
+    id: 'tmux-graphics-passthrough',
+    name: 'tmux graphics passthrough',
+    group: PatchGroup.MISC_CONFIGURABLE,
+    description:
+      'Images show inside tmux (needs allow-passthrough on and CLAUDE_CODE_FORCE_TERMINAL_IMAGES=1)',
+  },
   // Features
   {
     id: 'allow-custom-agent-models',
@@ -540,6 +550,13 @@ const PATCH_DEFINITIONS = [
       'Run !`...` commands in your own skills/commands without the permission check (SECURITY: includes project .claude skills; explicit deny rules still apply; plugins unaffected)',
   },
   {
+    id: 'dangerous-rm-env-check',
+    name: 'Check rm variables by value',
+    group: PatchGroup.MISC_CONFIGURABLE,
+    description:
+      'rm $VAR/... only asks when $VAR, as currently set, points somewhere dangerous',
+  },
+  {
     id: 'shimmer-style',
     name: 'Shimmer style',
     group: PatchGroup.MISC_CONFIGURABLE,
@@ -558,6 +575,13 @@ const PATCH_DEFINITIONS = [
     group: PatchGroup.FEATURES,
     description:
       'Trust every folder without asking, as if you chose "Yes, I trust this folder"',
+  },
+  {
+    id: 'remove-expanded-message-padding',
+    name: 'Remove expanded message padding',
+    group: PatchGroup.FEATURES,
+    description:
+      'Clicking a message in fullscreen mode no longer adds a blank line that pushes the text below it down',
   },
   {
     id: 'prevent-unsupported-updates',
@@ -947,6 +971,10 @@ export const buildPatchImplementations = (
       fn: c => writeScrollEscapeSequenceFilter(c),
       condition: !!config.settings.misc?.filterScrollEscapeSequences,
     },
+    'tmux-graphics-passthrough': {
+      fn: c => writeTmuxGraphicsPassthrough(c),
+      condition: !!config.settings.misc?.tmuxGraphicsPassthrough,
+    },
     // Features
     'allow-custom-agent-models': {
       fn: c => writeAllowCustomAgentModels(c),
@@ -1027,6 +1055,10 @@ export const buildPatchImplementations = (
       fn: c => writeSkipSkillShellValidation(c),
       condition: !!config.settings.misc?.skipSkillShellValidation,
     },
+    'dangerous-rm-env-check': {
+      fn: c => writeDangerousRmEnvCheck(c),
+      condition: !!config.settings.misc?.dangerousRmEnvCheck,
+    },
     'shimmer-style': {
       fn: c => writeShimmerStyle(c, config.settings.misc!.shimmer),
       condition: isShimmerCustomized(config.settings.misc?.shimmer),
@@ -1038,6 +1070,10 @@ export const buildPatchImplementations = (
     'skip-trust-dialog': {
       fn: c => writeSkipTrustDialog(c),
       condition: !!config.settings.misc?.skipTrustDialog,
+    },
+    'remove-expanded-message-padding': {
+      fn: c => writeRemoveExpandedMessagePadding(c),
+      condition: !!config.settings.misc?.removeExpandedMessagePadding,
     },
     // npm monolith only. Native builds spread the updater over several
     // modules; applyCustomization patches the whole module graph at once.

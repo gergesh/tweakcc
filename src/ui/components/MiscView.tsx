@@ -90,6 +90,7 @@ export function MiscView({ onSubmit }: MiscViewProps) {
     allowBypassPermissionsInSudo: false,
     suppressNativeInstallerWarning: false,
     filterScrollEscapeSequences: false,
+    tmuxGraphicsPassthrough: false,
     enableWorktreeMode: true,
     allowCustomAgentModels: false,
     enableContextLimitOverride: false,
@@ -101,6 +102,8 @@ export function MiscView({ onSubmit }: MiscViewProps) {
     skipSkillShellValidation: false,
     skipTrustDialog: false,
     skipDevChannelsDialog: false,
+    removeExpandedMessagePadding: false,
+    dangerousRmEnvCheck: false,
     preventUpdateToUnsupportedVersions: false,
     keepPatchedBinaryOnUpdate: true,
     webFetchUserAgent: null as string | null,
@@ -503,6 +506,20 @@ export function MiscView({ onSubmit }: MiscViewProps) {
         },
       },
       {
+        id: 'dangerousRmEnvCheck',
+        title: 'Check rm variables by value',
+        description:
+          'rm $VAR/... only forces a prompt when $VAR is unset, empty, changed by the command, or points at a system, home or workspace directory.',
+        getValue: () => settings.misc?.dangerousRmEnvCheck ?? false,
+        toggle: () => {
+          updateSettings(settings => {
+            ensureMisc();
+            settings.misc!.dangerousRmEnvCheck =
+              !settings.misc!.dangerousRmEnvCheck;
+          });
+        },
+      },
+      {
         id: 'shimmerEnabled',
         title: 'Spinner shimmer',
         description:
@@ -607,6 +624,20 @@ export function MiscView({ onSubmit }: MiscViewProps) {
           updateSettings(settings => {
             ensureMisc();
             settings.misc!.skipTrustDialog = !settings.misc!.skipTrustDialog;
+          });
+        },
+      },
+      {
+        id: 'removeExpandedMessagePadding',
+        title: 'Remove expanded message padding',
+        description:
+          'In fullscreen mode, clicking a message keeps its grey highlight but no longer adds a blank line that pushes the text below it down.',
+        getValue: () => settings.misc?.removeExpandedMessagePadding ?? false,
+        toggle: () => {
+          updateSettings(settings => {
+            ensureMisc();
+            settings.misc!.removeExpandedMessagePadding =
+              !settings.misc!.removeExpandedMessagePadding;
           });
         },
       },
@@ -816,6 +847,20 @@ export function MiscView({ onSubmit }: MiscViewProps) {
             ensureMisc();
             settings.misc!.filterScrollEscapeSequences =
               !settings.misc!.filterScrollEscapeSequences;
+          });
+        },
+      },
+      {
+        id: 'tmuxGraphicsPassthrough',
+        title: 'tmux graphics passthrough',
+        description:
+          'Show images inside tmux by wrapping kitty graphics in tmux passthrough. Needs `set -g allow-passthrough on` in tmux and CLAUDE_CODE_FORCE_TERMINAL_IMAGES=1.',
+        getValue: () => settings.misc?.tmuxGraphicsPassthrough ?? false,
+        toggle: () => {
+          updateSettings(settings => {
+            ensureMisc();
+            settings.misc!.tmuxGraphicsPassthrough =
+              !settings.misc!.tmuxGraphicsPassthrough;
           });
         },
       },

@@ -80,6 +80,7 @@ export function MiscView({ onSubmit }: MiscViewProps) {
     allowBypassPermissionsInSudo: false,
     suppressNativeInstallerWarning: false,
     filterScrollEscapeSequences: false,
+    tmuxGraphicsPassthrough: false,
     enableWorktreeMode: true,
     allowCustomAgentModels: false,
     enableContextLimitOverride: false,
@@ -88,6 +89,7 @@ export function MiscView({ onSubmit }: MiscViewProps) {
     enableVoiceConciseOutput: true,
     enableChannelsMode: false,
     skipTrustDialog: false,
+    removeExpandedMessagePadding: false,
     skipDevChannelsDialog: false,
     preventUpdateToUnsupportedVersions: false,
   };
@@ -495,6 +497,20 @@ export function MiscView({ onSubmit }: MiscViewProps) {
         },
       },
       {
+        id: 'removeExpandedMessagePadding',
+        title: 'Remove expanded message padding',
+        description:
+          'In fullscreen mode, clicking a message keeps its grey highlight but no longer adds a blank line that pushes the text below it down.',
+        getValue: () => settings.misc?.removeExpandedMessagePadding ?? false,
+        toggle: () => {
+          updateSettings(settings => {
+            ensureMisc();
+            settings.misc!.removeExpandedMessagePadding =
+              !settings.misc!.removeExpandedMessagePadding;
+          });
+        },
+      },
+      {
         id: 'enableContextLimitOverride',
         title: 'Override context limit',
         description:
@@ -686,6 +702,20 @@ export function MiscView({ onSubmit }: MiscViewProps) {
             ensureMisc();
             settings.misc!.filterScrollEscapeSequences =
               !settings.misc!.filterScrollEscapeSequences;
+          });
+        },
+      },
+      {
+        id: 'tmuxGraphicsPassthrough',
+        title: 'tmux graphics passthrough',
+        description:
+          'Show images inside tmux by wrapping kitty graphics in tmux passthrough. Needs `set -g allow-passthrough on` in tmux and CLAUDE_CODE_FORCE_TERMINAL_IMAGES=1.',
+        getValue: () => settings.misc?.tmuxGraphicsPassthrough ?? false,
+        toggle: () => {
+          updateSettings(settings => {
+            ensureMisc();
+            settings.misc!.tmuxGraphicsPassthrough =
+              !settings.misc!.tmuxGraphicsPassthrough;
           });
         },
       },

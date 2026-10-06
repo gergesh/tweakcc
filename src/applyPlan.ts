@@ -162,6 +162,8 @@ export function isPatchEnabledByConfig(
       return !!misc?.suppressNativeInstallerWarning;
     case 'filter-scroll-escape-sequences':
       return !!misc?.filterScrollEscapeSequences;
+    case 'tmux-graphics-passthrough':
+      return !!misc?.tmuxGraphicsPassthrough;
     case 'allow-custom-agent-models':
       return !!misc?.allowCustomAgentModels;
     case 'worktree-mode':
@@ -196,6 +198,8 @@ export function isPatchEnabledByConfig(
       return !!misc?.skipDevChannelsDialog;
     case 'skip-trust-dialog':
       return !!misc?.skipTrustDialog;
+    case 'remove-expanded-message-padding':
+      return !!misc?.removeExpandedMessagePadding;
     case 'prevent-unsupported-updates':
       return !!misc?.preventUpdateToUnsupportedVersions;
     default:

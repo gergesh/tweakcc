@@ -80,6 +80,10 @@ import { writeAutoAcceptPlanMode } from './autoAcceptPlanMode';
 import { writeAllowBypassPermsInSudo } from './allowBypassPermsInSudo';
 import { writeSuppressNativeInstallerWarning } from './suppressNativeInstallerWarning';
 import { writeScrollEscapeSequenceFilter } from './scrollEscapeSequenceFilter';
+import {
+  writeTmuxGraphicsPassthrough,
+  writeTmuxGraphicsPassthroughModules,
+} from './tmuxGraphicsPassthrough';
 import { writeWorktreeMode } from './worktreeMode';
 import { writeAllowCustomAgentModels } from './allowCustomAgentModels';
 import { writeVoiceMode } from './voiceMode';
@@ -92,6 +96,10 @@ import {
   writeSkipTrustDialog,
   writeSkipTrustDialogModules,
 } from './skipTrustDialog';
+import {
+  writeRemoveExpandedMessagePadding,
+  writeRemoveExpandedMessagePaddingModules,
+} from './expandedMessagePadding';
 import { writeClearScreen } from './clearScreen';
 import { writeSessionColor } from './sessionColor';
 import { writeKeybindingCustomization } from './keybindingCustomization';
@@ -436,6 +444,13 @@ const PATCH_DEFINITIONS = [
     description:
       'Filter out terminal escape sequences that cause unwanted scrolling',
   },
+  {
+    id: 'tmux-graphics-passthrough',
+    name: 'tmux graphics passthrough',
+    group: PatchGroup.MISC_CONFIGURABLE,
+    description:
+      'Images show inside tmux (needs allow-passthrough on and CLAUDE_CODE_FORCE_TERMINAL_IMAGES=1)',
+  },
   // Features
   {
     id: 'allow-custom-agent-models',
@@ -521,6 +536,13 @@ const PATCH_DEFINITIONS = [
     group: PatchGroup.FEATURES,
     description:
       'Trust every folder without asking, as if you chose "Yes, I trust this folder"',
+  },
+  {
+    id: 'remove-expanded-message-padding',
+    name: 'Remove expanded message padding',
+    group: PatchGroup.FEATURES,
+    description:
+      'Clicking a message in fullscreen mode no longer adds a blank line that pushes the text below it down',
   },
   {
     id: 'prevent-unsupported-updates',
@@ -661,10 +683,18 @@ export const applyCustomization = async (
   const needsNativeCorpus =
     needsNativeGuard ||
     wants(
+      'tmux-graphics-passthrough',
+      !!config.settings.misc?.tmuxGraphicsPassthrough
+    ) ||
+    wants(
       'skip-dev-channels-dialog',
       !!config.settings.misc?.skipDevChannelsDialog
     ) ||
-    wants('skip-trust-dialog', !!config.settings.misc?.skipTrustDialog);
+    wants('skip-trust-dialog', !!config.settings.misc?.skipTrustDialog) ||
+    wants(
+      'remove-expanded-message-padding',
+      !!config.settings.misc?.removeExpandedMessagePadding
+    );
 
   if (ccInstInfo.nativeInstallationPath) {
     // For native installations: restore the binary, then extract to memory
@@ -1016,6 +1046,23 @@ export const applyCustomization = async (
       fn: c => writeScrollEscapeSequenceFilter(c),
       condition: !!config.settings.misc?.filterScrollEscapeSequences,
     },
+    'tmux-graphics-passthrough': {
+      fn: c => {
+        if (!nativeCorpus) {
+          // A native extraction fallback only has the entrypoint, which no
+          // longer holds the graphics code; npm's cli.js holds everything.
+          return ccInstInfo.nativeInstallationPath
+            ? null
+            : writeTmuxGraphicsPassthrough(c);
+        }
+        return stageModulePatch(
+          'tmux-graphics-passthrough',
+          c,
+          writeTmuxGraphicsPassthroughModules(nativeModuleSources(c))
+        );
+      },
+      condition: !!config.settings.misc?.tmuxGraphicsPassthrough,
+    },
     // Features
     'allow-custom-agent-models': {
       fn: c => writeAllowCustomAgentModels(c),
@@ -1117,6 +1164,21 @@ export const applyCustomization = async (
         );
       },
       condition: !!config.settings.misc?.skipTrustDialog,
+    },
+    'remove-expanded-message-padding': {
+      fn: c => {
+        if (!nativeCorpus) {
+          return ccInstInfo.nativeInstallationPath
+            ? null
+            : writeRemoveExpandedMessagePadding(c);
+        }
+        return stageModulePatch(
+          'remove-expanded-message-padding',
+          c,
+          writeRemoveExpandedMessagePaddingModules(nativeModuleSources(c))
+        );
+      },
+      condition: !!config.settings.misc?.removeExpandedMessagePadding,
     },
     'prevent-unsupported-updates': {
       fn: c => {

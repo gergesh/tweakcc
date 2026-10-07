@@ -84,6 +84,10 @@ import { writeWorktreeMode } from './worktreeMode';
 import { writeAllowCustomAgentModels } from './allowCustomAgentModels';
 import { writeVoiceMode } from './voiceMode';
 import { writeChannelsMode } from './channelsMode';
+import {
+  writeRemoveExpandedMessagePadding,
+  writeRemoveExpandedMessagePaddingModules,
+} from './expandedMessagePadding';
 import { writeClearScreen } from './clearScreen';
 import { writeSessionColor } from './sessionColor';
 import { writeKeybindingCustomization } from './keybindingCustomization';
@@ -501,6 +505,13 @@ const PATCH_DEFINITIONS = [
       'Enable MCP channel notifications (--channels without allowlist or dev flag)',
   },
   {
+    id: 'remove-expanded-message-padding',
+    name: 'Remove expanded message padding',
+    group: PatchGroup.FEATURES,
+    description:
+      'Clicking a message in fullscreen mode no longer adds a blank line that pushes the text below it down',
+  },
+  {
     id: 'prevent-unsupported-updates',
     name: 'Prevent unsupported updates',
     group: PatchGroup.MISC_CONFIGURABLE,
@@ -636,7 +647,12 @@ export const applyCustomization = async (
     'prevent-unsupported-updates',
     !!config.settings.misc?.preventUpdateToUnsupportedVersions
   );
-  const needsNativeCorpus = needsNativeGuard;
+  const needsNativeCorpus =
+    needsNativeGuard ||
+    wants(
+      'remove-expanded-message-padding',
+      !!config.settings.misc?.removeExpandedMessagePadding
+    );
 
   if (ccInstInfo.nativeInstallationPath) {
     // For native installations: restore the binary, then extract to memory
@@ -1057,6 +1073,21 @@ export const applyCustomization = async (
     'channels-mode': {
       fn: c => writeChannelsMode(c),
       condition: !!config.settings.misc?.enableChannelsMode,
+    },
+    'remove-expanded-message-padding': {
+      fn: c => {
+        if (!nativeCorpus) {
+          return ccInstInfo.nativeInstallationPath
+            ? null
+            : writeRemoveExpandedMessagePadding(c);
+        }
+        return stageModulePatch(
+          'remove-expanded-message-padding',
+          c,
+          writeRemoveExpandedMessagePaddingModules(nativeModuleSources(c))
+        );
+      },
+      condition: !!config.settings.misc?.removeExpandedMessagePadding,
     },
     'prevent-unsupported-updates': {
       fn: c => {

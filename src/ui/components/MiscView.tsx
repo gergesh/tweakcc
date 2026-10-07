@@ -87,6 +87,7 @@ export function MiscView({ onSubmit }: MiscViewProps) {
     enableVoiceMode: false,
     enableVoiceConciseOutput: true,
     enableChannelsMode: false,
+    removeExpandedMessagePadding: false,
     preventUpdateToUnsupportedVersions: false,
   };
 
@@ -462,6 +463,20 @@ export function MiscView({ onSubmit }: MiscViewProps) {
             ensureMisc();
             settings.misc!.enableChannelsMode =
               !settings.misc!.enableChannelsMode;
+          });
+        },
+      },
+      {
+        id: 'removeExpandedMessagePadding',
+        title: 'Remove expanded message padding',
+        description:
+          'In fullscreen mode, clicking a message keeps its grey highlight but no longer adds a blank line that pushes the text below it down.',
+        getValue: () => settings.misc?.removeExpandedMessagePadding ?? false,
+        toggle: () => {
+          updateSettings(settings => {
+            ensureMisc();
+            settings.misc!.removeExpandedMessagePadding =
+              !settings.misc!.removeExpandedMessagePadding;
           });
         },
       },

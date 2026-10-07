@@ -91,6 +91,7 @@ import { writeWorktreeMode } from './worktreeMode';
 import { writeAllowCustomAgentModels } from './allowCustomAgentModels';
 import { writeVoiceMode } from './voiceMode';
 import { writeChannelsMode } from './channelsMode';
+import { writeRemoveExpandedMessagePadding } from './expandedMessagePadding';
 import { writeDisableCtrlZSuspend } from './disableCtrlZSuspend';
 import { writeWebFetchUserAgent } from './webFetchUserAgent';
 import { writeSkipSkillShellValidation } from './skipSkillShellValidation';
@@ -542,6 +543,13 @@ const PATCH_DEFINITIONS = [
     name: 'Shimmer style',
     group: PatchGroup.MISC_CONFIGURABLE,
     description: 'Spinner message shimmer will be toggled, sped up, or widened',
+  },
+  {
+    id: 'remove-expanded-message-padding',
+    name: 'Remove expanded message padding',
+    group: PatchGroup.FEATURES,
+    description:
+      'Clicking a message in fullscreen mode no longer adds a blank line that pushes the text below it down',
   },
   {
     id: 'prevent-unsupported-updates',
@@ -1014,6 +1022,10 @@ export const buildPatchImplementations = (
     'shimmer-style': {
       fn: c => writeShimmerStyle(c, config.settings.misc!.shimmer),
       condition: isShimmerCustomized(config.settings.misc?.shimmer),
+    },
+    'remove-expanded-message-padding': {
+      fn: c => writeRemoveExpandedMessagePadding(c),
+      condition: !!config.settings.misc?.removeExpandedMessagePadding,
     },
     // npm monolith only. Native builds spread the updater over several
     // modules; applyCustomization patches the whole module graph at once.

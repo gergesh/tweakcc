@@ -205,6 +205,8 @@ export function isPatchEnabledByConfig(
       return !!misc?.skipSkillShellValidation;
     case 'shimmer-style':
       return isShimmerCustomized(misc?.shimmer);
+    case 'remove-expanded-message-padding':
+      return !!misc?.removeExpandedMessagePadding;
     case 'prevent-unsupported-updates':
       return !!misc?.preventUpdateToUnsupportedVersions;
     case 'keep-patched-binary':

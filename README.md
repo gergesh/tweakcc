@@ -151,6 +151,7 @@ $ pnpm dlx tweakcc
   - [WebFetch User-Agent](#feature-webfetch-user-agent)
   - [Disable Ctrl-Z suspend](#feature-disable-ctrl-z-suspend)
   - [Skip shell permission check in your skills/commands](#feature-skip-shell-permission-check-in-your-skillscommands)
+  - [Check rm variables by value](#feature-check-rm-variables-by-value)
   - [Shimmer style](#feature-shimmer-style)
   - [Input cursor color](#feature-input-cursor-color)
   - [`/plan exit`](#feature-plan-exit)
@@ -1275,6 +1276,27 @@ Skills and slash commands can embed shell commands as `` !`command` ``. Claude C
 **Via the UI:** Run `npx tweakcc`, go to **Misc**, and toggle **Skip shell permission check in your skills/commands**.
 
 **Via `config.json`:** set `settings.misc.skipSkillShellValidation` to `true`.
+
+## Feature: Check rm variables by value
+
+Claude Code asks before any `rm` whose target starts with a variable, such as `rm -rf "$BUILD_DIR/"` or `rm -r $OUT/*`, because an empty variable would turn it into `rm -rf /`. That prompt can't be allowed by permission rules and shows up even with `--dangerously-skip-permissions`, including when the variable holds a harmless path.
+
+With this on, the patch works out every value each variable can have when the `rm` runs, and lets the command through only if all of them point somewhere deletable:
+
+- `X=build; rm -rf $X/`, `X=build && rm -rf $X/` and `export X=build; ...` use the assigned value. Relative results resolve against the working directory.
+- `X=build rm -rf $X/` uses the value from the Bash tool's environment, because bash expands `$X` before the prefix assignment applies. With `X` unset, that command is `rm -rf /`, so it still asks.
+- An assignment that might not run (after `||`, inside `( )`) still counts, but so does the outer value.
+- Other values come from the Bash tool's own shell: the patch starts it the way Claude Code does for each command (same environment, your shell snapshot, startup files like `~/.zshenv`) and asks it for the variables, which takes a few milliseconds. Variables Claude Code sets itself for each command (`TMPDIR`, `PATH`, session variables from hooks) can't be known this way, so they still ask.
+
+It still asks when a value is unset, empty, contains spaces, globs or `~`, or comes from an expansion like `$(...)`, `$1` or `${X:-$Y}`. It also asks when the command sets variables in ways it can't follow (`for X in`, `read`, `source`, `eval`, `declare`, `printf -v`, ...), or when a resulting path is `/`, a top-level directory, your home directory or a parent of it, or anything Claude Code's own path check protects (system directories, the working directory and its parents).
+
+When it still asks, the prompt ends with what it found, so you can see why:
+
+> Resolved by tweakcc: with $BUILD = `/` (from the Bash tool's environment), this removes `/`, the filesystem root.
+
+**Via the UI:** Run `npx tweakcc`, go to **Misc**, and toggle **Check rm variables by value**.
+
+**Via `config.json`:** set `settings.misc.dangerousRmEnvCheck` to `true`.
 
 ## Feature: Shimmer style
 

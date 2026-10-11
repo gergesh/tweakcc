@@ -94,6 +94,7 @@ import { writeChannelsMode } from './channelsMode';
 import { writeDisableCtrlZSuspend } from './disableCtrlZSuspend';
 import { writeWebFetchUserAgent } from './webFetchUserAgent';
 import { writeSkipSkillShellValidation } from './skipSkillShellValidation';
+import { writeDangerousRmEnvCheck } from './dangerousRmEnvCheck';
 import { isShimmerCustomized, writeShimmerStyle } from './shimmerStyle';
 import {
   applyPatchImplementationsToGraph,
@@ -536,6 +537,13 @@ const PATCH_DEFINITIONS = [
     group: PatchGroup.MISC_CONFIGURABLE,
     description:
       'Run !`...` commands in your own skills/commands without the permission check (SECURITY: includes project .claude skills; explicit deny rules still apply; plugins unaffected)',
+  },
+  {
+    id: 'dangerous-rm-env-check',
+    name: 'Check rm variables by value',
+    group: PatchGroup.MISC_CONFIGURABLE,
+    description:
+      'rm $VAR/... only asks when $VAR, as currently set, points somewhere dangerous',
   },
   {
     id: 'shimmer-style',
@@ -1010,6 +1018,10 @@ export const buildPatchImplementations = (
     'skip-skill-shell-validation': {
       fn: c => writeSkipSkillShellValidation(c),
       condition: !!config.settings.misc?.skipSkillShellValidation,
+    },
+    'dangerous-rm-env-check': {
+      fn: c => writeDangerousRmEnvCheck(c),
+      condition: !!config.settings.misc?.dangerousRmEnvCheck,
     },
     'shimmer-style': {
       fn: c => writeShimmerStyle(c, config.settings.misc!.shimmer),

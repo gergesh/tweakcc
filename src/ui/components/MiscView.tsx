@@ -99,6 +99,7 @@ export function MiscView({ onSubmit }: MiscViewProps) {
     enableChannelsMode: false,
     disableCtrlZSuspend: false,
     skipSkillShellValidation: false,
+    dangerousRmEnvCheck: false,
     preventUpdateToUnsupportedVersions: false,
     keepPatchedBinaryOnUpdate: true,
     webFetchUserAgent: null as string | null,
@@ -497,6 +498,20 @@ export function MiscView({ onSubmit }: MiscViewProps) {
             ensureMisc();
             settings.misc!.skipSkillShellValidation =
               !settings.misc!.skipSkillShellValidation;
+          });
+        },
+      },
+      {
+        id: 'dangerousRmEnvCheck',
+        title: 'Check rm variables by value',
+        description:
+          'rm $VAR/... only forces a prompt when $VAR is unset, empty, changed by the command, or points at a system, home or workspace directory.',
+        getValue: () => settings.misc?.dangerousRmEnvCheck ?? false,
+        toggle: () => {
+          updateSettings(settings => {
+            ensureMisc();
+            settings.misc!.dangerousRmEnvCheck =
+              !settings.misc!.dangerousRmEnvCheck;
           });
         },
       },

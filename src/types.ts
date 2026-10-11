@@ -149,6 +149,7 @@ export interface MiscConfig {
   enableChannelsMode: boolean;
   disableCtrlZSuspend: boolean;
   skipSkillShellValidation: boolean;
+  dangerousRmEnvCheck: boolean;
   preventUpdateToUnsupportedVersions: boolean;
   keepPatchedBinaryOnUpdate: boolean;
   webFetchUserAgent: string | null;

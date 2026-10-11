@@ -725,6 +725,7 @@ export const DEFAULT_SETTINGS: Settings = {
     enableChannelsMode: false,
     disableCtrlZSuspend: false,
     skipSkillShellValidation: false,
+    dangerousRmEnvCheck: false,
     preventUpdateToUnsupportedVersions: false,
     keepPatchedBinaryOnUpdate: true,
     webFetchUserAgent: null,

@@ -203,6 +203,8 @@ export function isPatchEnabledByConfig(
       return !!misc?.disableCtrlZSuspend;
     case 'skip-skill-shell-validation':
       return !!misc?.skipSkillShellValidation;
+    case 'dangerous-rm-env-check':
+      return !!misc?.dangerousRmEnvCheck;
     case 'shimmer-style':
       return isShimmerCustomized(misc?.shimmer);
     case 'prevent-unsupported-updates':
